@@ -1,9 +1,34 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 
 export default function Home() {
   const TWITTER_HANDLE = 'felipsbreno';
   const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+
+  const WalletMultiButtonDynamic = dynamic(
+    async () =>
+      (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+    { ssr: false },
+  );
+
+  const renderNotConnectedContainer = () => (
+    <div className="flex flex-col justify-center items-center p-8">
+      <Image
+        src={'/giphy.webp'}
+        alt="emoji"
+        width={300}
+        height={200}
+        quality={100}
+      />
+
+      <div className="mt-6">
+        <WalletMultiButtonDynamic style={{ background: '#e12' }}>
+          Connect a sua Carteira
+        </WalletMultiButtonDynamic>
+      </div>
+    </div>
+  );
 
   return (
     <div className="h-screen overflow-hidden text-center bg-gray-900">
@@ -11,6 +36,8 @@ export default function Home() {
         <div className="m-0 font-bold">
           <p className="text-2xl">🍭 Candy Drop</p>
           <p>Máquina de NFTs com cunhagem justa</p>
+
+          {renderNotConnectedContainer()}
         </div>
         <div className="flex justify-center items-center absolute w-full bottom-4 left-0">
           <Link
