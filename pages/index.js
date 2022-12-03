@@ -12,10 +12,16 @@ export default function Home() {
     { ssr: false },
   );
 
+  const WalletDisconnectButtonDynamic = dynamic(
+    async () =>
+      (await import('@solana/wallet-adapter-react-ui')).WalletDisconnectButton,
+    { ssr: false },
+  );
+
   const renderNotConnectedContainer = () => (
     <div className="flex flex-col justify-center items-center p-8">
       <Image
-        src={'/giphy.webp'}
+        src="/giphy.webp"
         alt="emoji"
         width={300}
         height={200}
@@ -24,8 +30,12 @@ export default function Home() {
 
       <div className="mt-6">
         <WalletMultiButtonDynamic style={{ background: '#e12' }}>
-          Connect a sua Carteira
+          Conectar a sua Carteira
         </WalletMultiButtonDynamic>
+
+        <WalletDisconnectButtonDynamic style={{ marginTop: 10 }}>
+          Desconectar sua carteira
+        </WalletDisconnectButtonDynamic>
       </div>
     </div>
   );

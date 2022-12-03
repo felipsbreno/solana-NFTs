@@ -21,35 +21,35 @@ const opts = {
 const CandyMachine = ({ walletAddress }) => {
   const getCandyMachineCreator = async (candyMachine) => {
     const candyMachineID = new PublicKey(candyMachine);
-    return await web3.PublicKey.findProgramAddress(
+    return await web3.PublicKey.findProgramAddressSync(
       [Buffer.from('candy_machine'), candyMachineID.toBuffer()],
-      candyMachineProgram
+      candyMachineProgram,
     );
   };
 
   const getMetadata = async (mint) => {
     return (
-      await PublicKey.findProgramAddress(
+      await PublicKey.findProgramAddressSync(
         [
           Buffer.from('metadata'),
           TOKEN_METADATA_PROGRAM_ID.toBuffer(),
           mint.toBuffer(),
         ],
-        TOKEN_METADATA_PROGRAM_ID
+        TOKEN_METADATA_PROGRAM_ID,
       )
     )[0];
   };
 
   const getMasterEdition = async (mint) => {
     return (
-      await PublicKey.findProgramAddress(
+      await PublicKey.findProgramAddressSync(
         [
           Buffer.from('metadata'),
           TOKEN_METADATA_PROGRAM_ID.toBuffer(),
           mint.toBuffer(),
           Buffer.from('edition'),
         ],
-        TOKEN_METADATA_PROGRAM_ID
+        TOKEN_METADATA_PROGRAM_ID,
       )
     )[0];
   };
@@ -58,7 +58,7 @@ const CandyMachine = ({ walletAddress }) => {
     associatedTokenAddress,
     payer,
     walletAddress,
-    splTokenMintAddress
+    splTokenMintAddress,
   ) => {
     const keys = [
       { pubkey: payer, isSigner: true, isWritable: true },
@@ -95,7 +95,7 @@ const CandyMachine = ({ walletAddress }) => {
       ? (
           await getAtaForMint(
             candyMachine.state.tokenMint,
-            walletAddress.publicKey
+            walletAddress.publicKey,
           )
         )[0]
       : walletAddress.publicKey;
@@ -111,7 +111,7 @@ const CandyMachine = ({ walletAddress }) => {
         space: MintLayout.span,
         lamports:
           await candyMachine.program.provider.connection.getMinimumBalanceForRentExemption(
-            MintLayout.span
+            MintLayout.span,
           ),
         programId: TOKEN_PROGRAM_ID,
       }),
@@ -120,13 +120,13 @@ const CandyMachine = ({ walletAddress }) => {
         mint.publicKey,
         0,
         walletAddress.publicKey,
-        walletAddress.publicKey
+        walletAddress.publicKey,
       ),
       createAssociatedTokenAccountInstruction(
         userTokenAccountAddress,
         walletAddress.publicKey,
         walletAddress.publicKey,
-        mint.publicKey
+        mint.publicKey,
       ),
       Token.createMintToInstruction(
         TOKEN_PROGRAM_ID,
@@ -134,7 +134,7 @@ const CandyMachine = ({ walletAddress }) => {
         userTokenAccountAddress,
         walletAddress.publicKey,
         [],
-        1
+        1,
       ),
     ];
 
@@ -143,7 +143,7 @@ const CandyMachine = ({ walletAddress }) => {
         pubkey: (
           await getNetworkToken(
             walletAddress.publicKey,
-            candyMachine.state.gatekeeper.gatekeeperNetwork
+            candyMachine.state.gatekeeper.gatekeeperNetwork,
           )
         )[0],
         isWritable: true,
@@ -158,7 +158,7 @@ const CandyMachine = ({ walletAddress }) => {
         remainingAccounts.push({
           pubkey: (
             await getNetworkExpire(
-              candyMachine.state.gatekeeper.gatekeeperNetwork
+              candyMachine.state.gatekeeper.gatekeeperNetwork,
             )
           )[0],
           isWritable: false,
@@ -168,7 +168,7 @@ const CandyMachine = ({ walletAddress }) => {
     }
     if (candyMachine.state.whitelistMintSettings) {
       const mint = new web3.PublicKey(
-        candyMachine.state.whitelistMintSettings.mint
+        candyMachine.state.whitelistMintSettings.mint,
       );
 
       const whitelistToken = (
@@ -196,7 +196,7 @@ const CandyMachine = ({ walletAddress }) => {
         signers.push(whitelistBurnAuthority);
         const exists =
           await candyMachine.program.provider.connection.getAccountInfo(
-            whitelistToken
+            whitelistToken,
           );
         if (exists) {
           instructions.push(
@@ -206,16 +206,16 @@ const CandyMachine = ({ walletAddress }) => {
               whitelistBurnAuthority.publicKey,
               walletAddress.publicKey,
               [],
-              1
-            )
+              1,
+            ),
           );
           cleanupInstructions.push(
             Token.createRevokeInstruction(
               TOKEN_PROGRAM_ID,
               whitelistToken,
               walletAddress.publicKey,
-              []
-            )
+              [],
+            ),
           );
         }
       }
@@ -243,23 +243,23 @@ const CandyMachine = ({ walletAddress }) => {
           transferAuthority.publicKey,
           walletAddress.publicKey,
           [],
-          candyMachine.state.price.toNumber()
-        )
+          candyMachine.state.price.toNumber(),
+        ),
       );
       cleanupInstructions.push(
         Token.createRevokeInstruction(
           TOKEN_PROGRAM_ID,
           userPayingAccountAddress,
           walletAddress.publicKey,
-          []
-        )
+          [],
+        ),
       );
     }
     const metadataAddress = await getMetadata(mint.publicKey);
     const masterEdition = await getMasterEdition(mint.publicKey);
 
     const [candyMachineCreator, creatorBump] = await getCandyMachineCreator(
-      candyMachineAddress
+      candyMachineAddress,
     );
 
     instructions.push(
@@ -284,7 +284,7 @@ const CandyMachine = ({ walletAddress }) => {
         },
         remainingAccounts:
           remainingAccounts.length > 0 ? remainingAccounts : undefined,
-      })
+      }),
     );
 
     try {
@@ -293,7 +293,7 @@ const CandyMachine = ({ walletAddress }) => {
           candyMachine.program.provider.connection,
           candyMachine.program.provider.wallet,
           [instructions, cleanupInstructions],
-          [signers, []]
+          [signers, []],
         )
       ).txs.map((t) => t.txid);
     } catch (e) {
