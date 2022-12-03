@@ -2,7 +2,10 @@ import { useMemo } from 'react';
 import { clusterApiUrl } from '@solana/web3.js';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import {
+  PhantomWalletAdapter,
+  CoinbaseWalletAdapter,
+} from '@solana/wallet-adapter-wallets';
 import {
   ConnectionProvider,
   WalletProvider,
@@ -14,7 +17,10 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 function MyApp({ Component, pageProps }) {
   const network = WalletAdapterNetwork.Devnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
+  const wallets = useMemo(
+    () => [new PhantomWalletAdapter(), new CoinbaseWalletAdapter()],
+    [],
+  );
 
   return (
     <ConnectionProvider endpoint={endpoint}>
